@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-// If you want to import local images from assets:
-// import modiImg from './assets/modi.jpg';
-// import saiImg from './assets/sai.jpg';
-// import cgLogo from './assets/cg_logo.jpg';
 
 function App() {
-  const [user, setUser] = useState(null); // Logged in user details
-  const [authView, setAuthView] = useState('login'); // 'login' or 'register'
-  const [loginRole, setLoginRole] = useState('user'); // 'user' or 'admin'
+  const [user, setUser] = useState(null); 
+  const [authView, setAuthView] = useState('login'); 
+  const [loginRole, setLoginRole] = useState('user'); 
   
   // Login States
   const [loginEmail, setLoginEmail] = useState('');
@@ -45,19 +41,22 @@ function App() {
     images: []
   });
 
+  // Load data from db.json via backend server on start
   useEffect(() => {
-    // Load registered users & session from localStorage (acting as db.json storage)
-    const savedUsers = localStorage.getItem('cg_users_db');
-    if (savedUsers) {
-      setUsersList(JSON.parse(savedUsers));
-    } else {
-      const initialUsers = [
-        { name: 'System Admin', email: 'admin@cg.gov.in', password: 'admin', phone: '9876543210', role: 'admin' },
-        { name: 'Rahul Kumar', email: 'rahul@gmail.com', password: 'user123', phone: '9123456789', role: 'user' }
-      ];
-      setUsersList(initialUsers);
-      localStorage.setItem('cg_users_db', JSON.stringify(initialUsers));
-    }
+    fetch('http://localhost:5000/api/data')
+      .then(res => res.json())
+      .then(data => {
+        if (data.users) setUsersList(data.users);
+        if (data.complaints) {
+          const formatted = data.complaints.map(c => {
+            if (!c.images && c.image) return { ...c, images: [c.image] };
+            if (!c.images) return { ...c, images: [] };
+            return c;
+          });
+          setComplaints(formatted);
+        }
+      })
+      .catch(err => console.error('Error connecting to backend server:', err));
 
     const savedSession = localStorage.getItem('cg_current_session');
     if (savedSession) {
@@ -72,63 +71,26 @@ function App() {
         }));
       }
     }
-
-    // Load Complaints
-    const savedComplaints = localStorage.getItem('cg_complaints_db');
-    if (savedComplaints) {
-      const parsed = JSON.parse(savedComplaints).map(c => {
-        if (!c.images && c.image) {
-          return { ...c, images: [c.image] };
-        }
-        if (!c.images) {
-          return { ...c, images: [] };
-        }
-        return c;
-      });
-      setComplaints(parsed);
-    } else {
-      fetch('/db.json')
-        .then(res => res.json())
-        .then(data => {
-          const formatted = data.complaints.map(c => ({
-            ...c,
-            images: c.image ? [c.image] : []
-          }));
-          setComplaints(formatted);
-          localStorage.setItem('cg_complaints_db', JSON.stringify(formatted));
-        })
-        .catch(err => {
-          console.log('Error loading db.json:', err);
-          const defaultComplaints = [
-            {
-              id: 'CG-2026-001',
-              title: 'Main Road Pothole Issue',
-              category: 'Roads & Infrastructure',
-              district: 'Raipur',
-              citizenName: 'Rahul Kumar',
-              phone: '9123456789',
-              email: 'rahul@gmail.com',
-              description: 'Large pothole developed on the main road.',
-              images: [],
-              status: 'Pending',
-              date: '2026-03-30',
-              userEmail: 'rahul@gmail.com'
-            }
-          ];
-          setComplaints(defaultComplaints);
-          localStorage.setItem('cg_complaints_db', JSON.stringify(defaultComplaints));
-        });
-    }
   }, []);
 
+  // Save complaints to db.json via backend
   const saveComplaintsToStorage = (updatedList) => {
     setComplaints(updatedList);
-    localStorage.setItem('cg_complaints_db', JSON.stringify(updatedList));
+    fetch('http://localhost:5000/api/complaints', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ complaints: updatedList })
+    }).catch(err => console.error('Error saving complaints:', err));
   };
 
+  // Save users to db.json via backend
   const saveUsersToStorage = (updatedUsers) => {
     setUsersList(updatedUsers);
-    localStorage.setItem('cg_users_db', JSON.stringify(updatedUsers));
+    fetch('http://localhost:5000/api/users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ users: updatedUsers })
+    }).catch(err => console.error('Error saving users:', err));
   };
 
   // Handle Registration
@@ -497,7 +459,7 @@ function App() {
 
         </div>
 
-        {/* NAVIGATION BUTTONS (PHOTO KE BILKUL NEECHEY) */}
+        {/* NAVIGATION BUTTONS */}
         <div className="nav-buttons" style={{ marginTop: '15px', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '12px' }}>
           <button 
             onClick={() => setActiveTab('view')}
