@@ -234,7 +234,12 @@ function App() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f0f2f5', fontFamily: 'Arial, sans-serif' }}>
         <div style={{ background: '#fff', padding: '35px', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', width: '100%', maxWidth: '420px' }}>
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-            <div style={{ background: '#003366', color: '#fff', width: '55px', height: '55px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', margin: '0 auto 10px auto' }}>CG</div>
+            <img 
+              src={require('./assets/cg_logo.jpg')} 
+              alt="CG Logo" 
+              style={{ width: '55px', height: '55px', borderRadius: '50%', objectFit: 'cover', margin: '0 auto 10px auto', display: 'block', border: '2px solid #003366' }} 
+              onError={(e)=>{ e.target.onerror = null; e.target.src="https://via.placeholder.com/55?text=CG"; }} 
+            />
             <h2>Chhattisgarh Portal</h2>
             <p style={{ color: '#666', fontSize: '13px' }}>Jan Shikayat & Verification System</p>
           </div>
@@ -377,7 +382,12 @@ function App() {
       <header className="header">
         <div className="header-content" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
           <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div className="logo-badge">CG</div>
+            <img 
+              src={require('./assets/cg_logo.jpg')} 
+              alt="CG Logo" 
+              style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #fff', boxShadow: '0 2px 5px rgba(0,0,0,0.3)' }} 
+              onError={(e)=>{ e.target.onerror = null; e.target.src="https://via.placeholder.com/50?text=CG"; }} 
+            />
             <div className="header-title">
               <h1>Chhattisgarh Jan Shikayat Portal</h1>
               <p>Welcome, {user.name} ({user.role.toUpperCase()})</p>
